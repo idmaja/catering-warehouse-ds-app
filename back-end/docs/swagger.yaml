@@ -1,0 +1,823 @@
+openapi: 3.0.3
+info:
+  title: Catering & Warehouse D&S API
+  description: API for warehouse and catering management system
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: admin@dsayambakar.my.id
+
+servers:
+  - url: /api/v1
+    description: Development server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [user, admin, superadmin]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sku:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+        category_id:
+          type: string
+        category_name:
+          type: string
+        category_color:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        color:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    OrderItem:
+      type: object
+      properties:
+        item_id:
+          type: string
+        item_name:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          minimum: 0
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        order_number:
+          type: string
+        type:
+          type: string
+          enum: [purchase, sales]
+        status:
+          type: string
+          enum: [draft, approved, completed]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        total_amount:
+          type: number
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    MenuCategory:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Menu:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        category_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    CreateItemRequest:
+      type: object
+      required:
+        - name
+        - sku
+        - quantity
+        - category_id
+      properties:
+        name:
+          type: string
+        sku:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+        category_id:
+          type: string
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - type
+        - items
+      properties:
+        type:
+          type: string
+          enum: [purchase, sales]
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+        error:
+          type: string
+
+paths:
+  # Authentication
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/google:
+    get:
+      tags:
+        - Authentication
+      summary: Google OAuth login
+      responses:
+        '302':
+          description: Redirect to Google OAuth
+
+  /auth/google/callback:
+    get:
+      tags:
+        - Authentication
+      summary: Google OAuth callback
+      responses:
+        '200':
+          description: OAuth successful
+
+  # Items
+  /items:
+    get:
+      tags:
+        - Items
+      summary: Get all items
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /items/{id}:
+    get:
+      tags:
+        - Items
+      summary: Get item by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Item not found
+
+  /items/stats:
+    get:
+      tags:
+        - Items
+      summary: Get item statistics
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Item statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /items/generate-sku:
+    get:
+      tags:
+        - Items
+      summary: Generate SKU
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Generated SKU
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /admin/items:
+    post:
+      tags:
+        - Items (Admin)
+      summary: Create new item
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemRequest'
+      responses:
+        '201':
+          description: Item created successfully
+        '400':
+          description: Invalid input
+        '403':
+          description: Insufficient permissions
+
+  /admin/items/{id}:
+    put:
+      tags:
+        - Items (Admin)
+      summary: Update item
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemRequest'
+      responses:
+        '200':
+          description: Item updated successfully
+        '404':
+          description: Item not found
+        '403':
+          description: Insufficient permissions
+
+    delete:
+      tags:
+        - Items (Admin)
+      summary: Delete item
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item deleted successfully
+        '404':
+          description: Item not found
+        '403':
+          description: Insufficient permissions
+
+  # Categories
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: Get all categories
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /admin/categories:
+    post:
+      tags:
+        - Categories (Admin)
+      summary: Create new category
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - color
+              properties:
+                name:
+                  type: string
+                color:
+                  type: string
+      responses:
+        '201':
+          description: Category created successfully
+        '403':
+          description: Insufficient permissions
+
+  /admin/categories/{id}:
+    put:
+      tags:
+        - Categories (Admin)
+      summary: Update category
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category updated successfully
+        '403':
+          description: Insufficient permissions
+
+    delete:
+      tags:
+        - Categories (Admin)
+      summary: Delete category
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category deleted successfully
+        '403':
+          description: Insufficient permissions
+
+  # Orders
+  /orders:
+    get:
+      tags:
+        - Orders
+      summary: Get all orders
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /orders/{id}:
+    get:
+      tags:
+        - Orders
+      summary: Get order by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /admin/orders:
+    post:
+      tags:
+        - Orders (Admin)
+      summary: Create new order
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created successfully
+        '403':
+          description: Insufficient permissions
+
+  /admin/orders/{id}/status:
+    put:
+      tags:
+        - Orders (Admin)
+      summary: Update order status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [draft, approved, completed]
+      responses:
+        '200':
+          description: Order status updated successfully
+        '403':
+          description: Insufficient permissions
+
+  /admin/orders/{id}:
+    delete:
+      tags:
+        - Orders (Admin)
+      summary: Delete order
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order deleted successfully
+        '403':
+          description: Insufficient permissions
+
+  # Menu Categories
+  /menu-categories:
+    get:
+      tags:
+        - Menu Categories
+      summary: Get all menu categories
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of menu categories
+
+  /admin/menu-categories:
+    post:
+      tags:
+        - Menu Categories (Admin)
+      summary: Create menu category
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Menu category created
+        '403':
+          description: Insufficient permissions
+
+  # Menus
+  /menus:
+    get:
+      tags:
+        - Menus
+      summary: Get all menus
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of menus
+
+  /menus/{id}:
+    get:
+      tags:
+        - Menus
+      summary: Get menu by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Menu details
+
+  # Catering Orders
+  /catering-orders:
+    get:
+      tags:
+        - Catering Orders
+      summary: Get all catering orders
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of catering orders
+
+  /catering-orders/{id}:
+    get:
+      tags:
+        - Catering Orders
+      summary: Get catering order by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Catering order details
+
+  # Reports
+  /reports/dashboard:
+    get:
+      tags:
+        - Reports
+      summary: Get dashboard report
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Dashboard statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  # Super Admin Only
+  /superadmin/users:
+    get:
+      tags:
+        - Users (Super Admin)
+      summary: Get all users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of users
+        '403':
+          description: Insufficient permissions
+
+    post:
+      tags:
+        - Users (Super Admin)
+      summary: Create new user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+                - role
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [user, admin, superadmin]
+      responses:
+        '201':
+          description: User created successfully
+        '403':
+          description: Insufficient permissions
+
+  /superadmin/users/{id}:
+    put:
+      tags:
+        - Users (Super Admin)
+      summary: Update user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User updated successfully
+        '403':
+          description: Insufficient permissions
+
+    delete:
+      tags:
+        - Users (Super Admin)
+      summary: Delete user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User deleted successfully
+        '403':
+          description: Insufficient permissions
+
+  /superadmin/activity-logs:
+    get:
+      tags:
+        - Activity Logs (Super Admin)
+      summary: Get all activity logs
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of activity logs
+        '403':
+          description: Insufficient permissions
+
+  /superadmin/activity-logs/{id}:
+    get:
+      tags:
+        - Activity Logs (Super Admin)
+      summary: Get activity log by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Activity log details
+        '403':
+          description: Insufficient permissions
