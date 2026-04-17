@@ -35,3 +35,7 @@ npm start
 - `POST /api/v1/admin/items` - Create item (admin/superadmin only)
 - `PUT /api/v1/admin/items/:id` - Update item (admin/superadmin only)
 - `DELETE /api/v1/admin/items/:id` - Delete item (admin/superadmin only)
+
+## License
+
+This project is licensed under **CC BY-NC-ND 4.0**. See the main [LICENSE](../LICENSE) file for details.

@@ -92,3 +92,7 @@ Error responses:
   "error": "Detailed error information"
 }
 ```
+
+## License
+
+This project is licensed under **CC BY-NC-ND 4.0**. See the main [LICENSE](../../LICENSE) file for details.

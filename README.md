@@ -75,3 +75,14 @@ Copy `.env.example` files in both directories and configure:
 
 - Backend: `http://localhost:8080`
 - Frontend: `http://localhost:3000`
+
+## License
+
+This project is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License (CC BY-NC-ND 4.0)**.
+
+- ✅ You may view and use this code for personal and educational purposes
+- ❌ You may NOT use this code for commercial purposes
+- ❌ You may NOT distribute modified versions of this code
+- ✅ You must give appropriate credit to the original author
+
+For more details, see the [LICENSE](LICENSE) file or visit https://creativecommons.org/licenses/by-nc-nd/4.0/
