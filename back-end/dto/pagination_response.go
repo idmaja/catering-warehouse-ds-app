@@ -1,11 +1,5 @@
 package dto
 
-type PaginationParams struct {
-	Page     int
-	Limit    int
-	Offset   int
-}
-
 type PaginationResponse struct {
 	Data        interface{} `json:"data"`
 	Total       int64       `json:"total"`

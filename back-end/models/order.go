@@ -6,27 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type OrderType string
-type OrderStatus string
-
-const (
-	PurchaseOrder OrderType = "purchase"
-	SalesOrder    OrderType = "sales"
-)
-
-const (
-	StatusDraft     OrderStatus = "draft"
-	StatusApproved  OrderStatus = "approved"
-	StatusCompleted OrderStatus = "completed"
-)
-
-type OrderItem struct {
-	ItemID   primitive.ObjectID `bson:"item_id" json:"item_id"`
-	ItemName string             `bson:"item_name" json:"item_name"`
-	Quantity int                `bson:"quantity" json:"quantity" validate:"min=1"`
-	Price    float64            `bson:"price" json:"price" validate:"min=0"`
-}
-
 type Order struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	OrderNumber string             `bson:"order_number" json:"order_number"`
