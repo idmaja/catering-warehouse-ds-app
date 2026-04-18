@@ -6,41 +6,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type CateringOrderType string
-type CateringOrderStatus string
-
-const (
-	CateringOrderTypeMenu    CateringOrderType = "menu"
-	CateringOrderTypeSubmenu CateringOrderType = "submenu"
-)
-
-const (
-	CateringStatusPending    CateringOrderStatus = "pending"
-	CateringStatusConfirmed  CateringOrderStatus = "confirmed"
-	CateringStatusPreparing  CateringOrderStatus = "preparing"
-	CateringStatusReady      CateringOrderStatus = "ready"
-	CateringStatusDelivered  CateringOrderStatus = "delivered"
-	CateringStatusCompleted  CateringOrderStatus = "completed"
-	CateringStatusCancelled  CateringOrderStatus = "cancelled"
-)
-
-type CateringOrderSubmenu struct {
-	ItemID   primitive.ObjectID `bson:"item_id" json:"item_id"`
-	ItemName string             `bson:"item_name" json:"item_name"`
-	ItemType CateringOrderType  `bson:"item_type" json:"item_type"`
-	Quantity int                `bson:"quantity" json:"quantity" validate:"min=1"`
-	Price    float64            `bson:"price" json:"price" validate:"min=0"`
-}
-
-type CateringOrderItem struct {
-	ItemID    primitive.ObjectID     `bson:"item_id" json:"item_id"`
-	ItemName  string                 `bson:"item_name" json:"item_name"`
-	ItemType  CateringOrderType      `bson:"item_type" json:"item_type"`
-	Quantity  int                    `bson:"quantity" json:"quantity" validate:"min=1"`
-	Price     float64                `bson:"price" json:"price" validate:"min=0"`
-	Submenus  []CateringOrderSubmenu `bson:"submenus,omitempty" json:"submenus,omitempty"`
-}
-
 type CateringOrder struct {
 	ID           primitive.ObjectID    `bson:"_id,omitempty" json:"id,omitempty"`
 	OrderNumber  string                `bson:"order_number" json:"order_number"`
@@ -55,3 +20,4 @@ type CateringOrder struct {
 	CreatedAt    time.Time             `bson:"created_at" json:"created_at"`
 	UpdatedAt    time.Time             `bson:"updated_at" json:"updated_at"`
 }
+
